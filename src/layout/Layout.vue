@@ -24,7 +24,7 @@
                     <img style="height:40px;border-radius:50%;margin-right:10px;" :src="avator"/>
                     <a-dropdown style="margin-top: 10px;" :overlayStyle="{paddingTop: '20px'}">
                         <a class="ant-dropdown-link" @click.prevent>
-                            Admin
+                            {{ LoginUserName }}
                             <down-outlined />
                         </a>
                         <template #overlay>
@@ -33,7 +33,7 @@
                                 <a @click="logout()">退出登录</a>
                                 </a-menu-item>
                                 <a-menu-item>
-                                <a href="javascript:;">修改密码</a>
+                                <a @click="handlePasswd()">修改密码</a>
                                 </a-menu-item>
                             </a-menu>
                         </template>
@@ -130,6 +130,39 @@
             </a-layout>
         </a-layout>
     </a-layout>
+
+    <a-modal
+            v-model:visible="passwdModal"
+            title="修改密码"
+            :confirm-loading="appLoading"
+            cancelText="取消"
+            okText="确认"
+            :afterClose="handleClose"
+            @ok="passwdChartFunc">
+            <a-form ref="passwdRef" :model="passwdChart"   :labelCol="{style: {width: '30%'}}">
+                <a-input  hidden v-model:value="passwdChart.id" style="width: 200px"/>
+                <a-form-item
+                    label="旧密码"
+                    name="oldpasswd"
+                    :rules="[{ required: true, message:'请输入旧密码'}]">
+                    <a-input type="password" v-model:value="passwdChart.oldpasswd" style="width: 200px"/>
+                </a-form-item>
+                <a-form-item
+                    label="新密码"
+                    name="newpasswd"
+                    :rules="[{ required: true, message: '请输入新密码'}]">
+                    <a-input type="password" v-model:value="passwdChart.newpasswd" style="width: 200px"  />
+                </a-form-item>
+                <a-form-item
+                    label="确认密码"
+                    name="newpasswd1"
+                    :rules="[{ required: true, message: '请输入确认密码'  }]">
+                    <a-input type="password" v-model:value="passwdChart.newpasswd1" style="width: 200px"  />
+                </a-form-item>
+            </a-form>
+
+    </a-modal>        
+
 </template>
 <script>
 import { onBeforeMount, onMounted, reactive, ref } from 'vue';
@@ -141,12 +174,55 @@ import common from "@/config";
 import { message } from 'ant-design-vue';
 export default ({
     setup() {
+        //修改密码
+        const appLoading = ref(false)
+        const passwdModal = ref(false)
+        const passwdRef = ref()
+        const passwdChart = reactive({
+            id: localStorage.getItem("userid"),
+            oldpasswd: '',
+            newpasswd: '',
+            newpasswd1: '',
+        })
+        const passwdChartData = reactive({
+            url: common.changePasswd,
+            params: {
+                id:  localStorage.getItem("userid"),
+                oldpasswd: '',
+                newpasswd: '',
+                newpasswd1: '',
+            }
+        })
+        //新增
+        function handlePasswd() {
+            passwdModal.value = true
+        }
+        function passwdChartFunc() {
+            appLoading.value = true
+            passwdChartData.params = passwdChart
+            httpClient.post(passwdChartData.url, passwdChartData.params)
+            .then(res => {
+                message.success(res.msg)
+            })
+            .catch(res => {
+                message.error(res.msg)
+            })
+            .finally(() => {
+                //重置表单
+                passwdRef.value.resetFields()
+                //关闭抽屉
+                passwdModal.value = false
+                appLoading.value = false
+            })
+        }
         // const appLoading = ref(false)
+        const LoginUserName = localStorage.getItem("name")
         const routers = ref([])
         const openKeys = ref([])
         const collapsed = ref(false)
         const selectedKeys1 = ref([])
         const selectedKeys2 = ref([])
+
         //集群列表
         const clusterList = ref([])
         //发起请求用的变量以Data结尾
@@ -178,6 +254,7 @@ export default ({
             //     appLoading.value = false
             // })
         }
+
         function clusterChange(val)  {
             if (selectedKeys1.value[0] == val) {
                 return
@@ -219,6 +296,7 @@ export default ({
             localStorage.removeItem('name');
             //移除token
             sessionStorage.removeItem('token');
+            sessionStorage.removeItem('userid');
             //跳转至/login页面
             router.push('/login');
         }
@@ -228,6 +306,7 @@ export default ({
             if (localStorage.getItem('k8s_cluster')) {
                 selectedKeys1.value[0] = localStorage.getItem('k8s_cluster')
             }
+
         })
         onMounted(() => {
             routers.value = router.options.routes
@@ -247,7 +326,14 @@ export default ({
             routeChange,
             onOpenChange,
             logout,
-            clusterChange
+            clusterChange,
+            LoginUserName,
+            handlePasswd,
+            appLoading,
+            passwdChartFunc,
+            passwdModal,
+            passwdRef,
+            passwdChart,
         };
     },
 });

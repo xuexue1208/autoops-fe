@@ -67,6 +67,7 @@ export default({
             httpClient.post(loginUrl, loginData)
             .then(res => {
                 localStorage.setItem('name', loginData.name);
+                localStorage.setItem('userid', res.data);
                 localStorage.setItem('loginDate', moment().format('YYYY-MM-DD HH:mm:ss'));
                 sessionStorage.setItem('token',res.token)
                 router.push('/');

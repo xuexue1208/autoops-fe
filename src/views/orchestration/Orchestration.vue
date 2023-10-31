@@ -26,6 +26,9 @@
                     <template v-if="column.dataIndex === 'replicas'">
                         <span style="color: rgb(84, 138, 238);">{{ record.replicas }}</span>
                     </template>
+                    <template v-if="column.dataIndex === 'port'">
+                        <span style="color: rgb(84, 138, 238);">{{ record.port }}</span>
+                    </template>
                     <template v-if="column.dataIndex === 'mem'">
                         <span>{{ record.request_mem }} / {{ record.limit_mem }}</span>
                     </template>
@@ -82,6 +85,12 @@
                     name="replicas"
                     :rules="[{ required: true, message: '请输入副本数' }]">
                     <a-input-number v-model:value="createOrch.replicas" size="small" :min="1" :max="30" />
+                </a-form-item>
+                <a-form-item
+                    label="监听端口"
+                    name="port"
+                    :rules="[{ required: true, message: '请输入监听端口' }]">
+                    <a-input-number v-model:value="createOrch.port" size="small" :min="1" :max="65535" />
                 </a-form-item>
                 <a-form-item
                     label="Request 内存"
@@ -152,6 +161,12 @@
                             {{ item.env }}
                         </a-select-option>
                     </a-select>
+                </a-form-item>
+                <a-form-item
+                    label="监听端口"
+                    name="port"
+                    :rules="[{ required: true, message: '请输入监听端口' }]">
+                    <a-input-number v-model:value="updateOrch.port" size="small" :min="1" :max="65535" />
                 </a-form-item>
                 <a-form-item
                     label="副本数"
@@ -229,6 +244,10 @@ export default ({
             {
                 title: '副本数',
                 dataIndex: 'replicas',
+            },
+            {
+                title: '端口',
+                dataIndex: 'port',
             },
             {
                 title: '内存 (req/limit)',
@@ -447,6 +466,7 @@ export default ({
                 updateOrch.id = row.id
                 updateOrch.app_id = row.app_id
                 updateOrch.en = row.en
+                updateOrch.port = row.port
                 updateOrch.replicas = row.replicas
                 updateOrch.request_mem = row.request_mem
                 updateOrch.limit_mem = row.limit_mem
@@ -465,7 +485,12 @@ export default ({
             createOrchData.params = createOrch
             httpClient.post(createOrchData.url, createOrchData.params)
             .then(res => {
-                message.success(res.msg)
+                //添加 if判断 
+                if (res.code != 0) {
+                    message.error(res.msg)
+                } else {
+                    message.success(res.msg)
+                }
             })
             .catch(res => {
                 message.error(res.msg)
@@ -484,7 +509,11 @@ export default ({
             updateOrchData.params = updateOrch
             httpClient.put(updateOrchData.url, updateOrchData.params)
             .then(res => {
-                message.success(res.msg)
+                if (res.code != 0) {
+                    message.error(res.msg)
+                } else {
+                    message.success(res.msg)
+                }
             })
             .catch(res => {
                 message.error(res.msg)

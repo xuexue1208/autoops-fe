@@ -27,6 +27,10 @@
                     <template v-if="column.dataIndex === 'CreatedAt'">
                         <a-tag color="gray">{{ timeTrans(record.CreatedAt) }}</a-tag>
                     </template>
+                    <template v-if="column.dataIndex === 'status'">
+                        <a-progress v-if="record.status == 'success'" :percent="100" :steps="5" size="small" stroke-color="#52c41a"/>
+                        <a-progress v-else :percent="50" :steps="5" status="exception" size="small" stroke-color="#a61d24"/>
+                    </template>
                     <template v-if="column.key === 'action'">
                         <a-button size="small" type="link" @click="gotoTikton(record)">详情</a-button>
                     </template>
@@ -73,6 +77,10 @@ export default ({
                 title: '创建时间',
                 dataIndex: 'CreatedAt'
             },
+            {
+                title: '状态',
+                dataIndex: 'status'
+            },   
             {
                 title: '操作',
                 key: 'action',

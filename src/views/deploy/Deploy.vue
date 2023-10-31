@@ -77,10 +77,10 @@
                     :rules="[{ required: true, message: '请选择环境' }]">
                     <a-select style="width:140px;margin-right:20px;" size="small" v-model:value="createDeploy.en" placeholder="请选择">
                         <a-select-option
-                            v-for="(item, index) in enList"
-                            :key="index"
-                            :value="item">
-                            {{ item }}
+                            v-for="(item) in enList"
+                            :key="item.id"
+                            :value="item.env">
+                            {{ item.env }}
                         </a-select-option>
                     </a-select>
                 </a-form-item>
@@ -125,7 +125,7 @@
                 </a-form-item>
                 <a-form-item
                     label="环境"
-                    name="en"
+                    name="env"
                     :rules="[{ required: true, message: '请选择环境' }]">
                     <a-select style="width:140px;margin-right:20px;" size="small" v-model:value="updateDeploy.en" placeholder="请选择">
                         <a-select-option
@@ -203,10 +203,6 @@ export default ({
                 dataIndex: 'env'
             },
             {
-                title: '环境',
-                dataIndex: 'en',
-            },
-            {
                 title: 'Tag',
                 dataIndex: 'tag',
             },
@@ -237,8 +233,8 @@ export default ({
         //常用项
         const appLoading = ref(false)
         const searchValue = ref('')
-        const enValue = ref('')
-        const enList = ref([])
+        
+        
         //分页
         const pagination = reactive({
             showSizeChanger: true,
@@ -332,12 +328,34 @@ export default ({
             date = date.substring(0, 19).replace('T', ' ')
             return date 
         }
-        function getEnvValue(val) {
-            enValue.value = val
-        }
+
+        //环境
+        const enList = ref([])
         function getEnvList(val) {
             enList.value = val
         }
+        const enValue = ref('')
+        function getEnvValue(val) {
+            enValue.value = val
+        }
+        const envAllListData = reactive({
+            url: common.evnList,
+            params: {}
+        })
+        function getEnvAllList() {
+            httpClient.get(envAllListData.url, {params: envAllListData.params})
+            .then(res => {
+                //响应成功，获取pod列表和total
+                enList.value = res.data
+            })
+            .catch(res => {
+                message.error(res.msg)
+            })
+        }
+        //
+        
+
+
         function getSearchValue(val) {
             searchValue.value = val
             pagination.currentPage = 1
@@ -406,6 +424,7 @@ export default ({
                 break
             }
             getAppAllList()
+            getEnvAllList()
         }
         async function formSubmit(val) {
             try {

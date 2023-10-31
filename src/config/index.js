@@ -1,6 +1,8 @@
-const baseHost = 'http://10.0.4.56:9090'
+const baseHost = 'http://kapi-demo.eastbuy.com'
 export default {
     //登录
+    //修改密码
+    changePasswd: baseHost + '/api/changepasswd',
     //应用管理
     appList: baseHost + '/api/app/list',
     appAllRes: baseHost + '/api/app/all',
@@ -22,7 +24,8 @@ export default {
     deployUpdate: baseHost + '/api/deploy/update',
     deployDel: baseHost + '/api/deploy/del',
     deployLog: baseHost + '/api/deploy/getLog',
-
+    //cicd
+    cicdDeploy: baseHost + '/api/cicd/appDeploy',
     //所有资源数据
     k8sAllRes: baseHost + '/api/k8s/allres',
     metricRes: baseHost + '/api/metrics',
